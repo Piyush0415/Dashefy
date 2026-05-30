@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashify &mdash; Dashboard Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F0E8;
+    --cream-dark: #EDE6D6;
+    --ink: #1A1814;
+    --ink-soft: #4A4640;
+    --ink-muted: #8A8580;
+    --accent: #C8502A;
+    --accent-pale: #F2E4DC;
+    --white: #FFFFFF;
+    --border: rgba(26,24,20,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--ink); letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-actions { display: flex; align-items: center; gap: 24px; }
+  .nav-links { display: flex; align-items: center; gap: 22px; }
+  .nav-links a {
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    text-decoration: none; letter-spacing: 0.3px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--ink); color: var(--white);
+    font-size: 13px; font-weight: 500;
+    padding: 8px 20px; border-radius: 100px;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent); }
+
+  .hero {
+    padding: 90px 5vw 70px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px; align-items: center;
+    max-width: 1280px; margin: 0 auto;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(38px, 5vw, 62px);
+    line-height: 1.1; letter-spacing: -1px; color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p {
+    font-size: 16px; line-height: 1.7; color: var(--ink-soft);
+    max-width: 420px; margin-bottom: 36px;
+  }
+  .hero-actions { display: flex; gap: 12px; align-items: center; }
+  .btn-primary {
+    background: var(--accent); color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    padding: 12px 28px; border-radius: 100px;
+    text-decoration: none; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-ghost {
+    font-size: 14px; font-weight: 500; color: var(--ink-soft);
+    text-decoration: none; display: flex; align-items: center; gap: 6px;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+  .btn-ghost::after { content: '\2192'; }
+
+  .hero-visual {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .hero-mini-card {
+    background: var(--white); border-radius: 14px;
+    border: 1px solid var(--border); overflow: hidden;
+    padding: 16px; animation: float 4s ease-in-out infinite;
+  }
+  .hero-mini-card:nth-child(2) { animation-delay: 1s; margin-top: 20px; }
+  .hero-mini-card:nth-child(3) { animation-delay: 2s; margin-top: -20px; }
+  .hero-mini-card:nth-child(4) { animation-delay: 0.5s; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .mini-label { font-size: 11px; font-weight: 500; color: var(--ink-muted); margin-bottom: 8px; }
+  .mini-num { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); }
+  .mini-bar-row { display: flex; gap: 3px; align-items: flex-end; margin-top: 10px; height: 36px; }
+  .mini-bar-row div { flex: 1; border-radius: 3px 3px 0 0; }
+
+  .gallery-tools {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 5vw 0;
+    scroll-margin-top: 76px;
+  }
+  .gallery-tools-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+  }
+  .gallery-kicker {
+    color: var(--ink-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .filter-search {
+    position: relative;
+    flex: 1 1 220px;
+    max-width: 320px;
+    display: block;
+  }
+  .filter-search input {
+    width: 100%;
+    height: 38px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    padding: 0 16px 0 40px;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .filter-search input:focus {
+    border-color: rgba(200,80,42,0.5);
+    box-shadow: 0 0 0 3px rgba(200,80,42,0.12);
+  }
+  .filter-search input::placeholder { color: var(--ink-muted); }
+  .search-icon {
+    color: var(--ink-muted);
+    height: 16px;
+    left: 15px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    line-height: 0;
+    font-size: 0;
+  }
+  .search-icon svg {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+  .filter-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 9px 15px;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
+  }
+  .filter-btn:hover {
+    border-color: rgba(200,80,42,0.35);
+    color: var(--accent);
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+  }
+
+  .gallery {
+    padding: 24px 5vw 100px;
+    max-width: 1280px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr));
+    gap: 24px;
+  }
+  .gallery.single-dashboard {
+    grid-template-columns: minmax(300px, 880px);
+    justify-content: center;
+  }
+  .card {
+    background: var(--white); border-radius: 18px;
+    border: 1px solid var(--border); overflow: hidden;
+    transition: transform 0.22s, box-shadow 0.22s;
+    cursor: pointer;
+    animation: fadeUp 0.5s ease both;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(26,24,20,0.10);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+  .card:nth-child(8) { animation-delay: 0.40s; }
+  .card:nth-child(9) { animation-delay: 0.45s; }
+  .card-thumb {
+    aspect-ratio: 16 / 9;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .card-body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+  .card-title { font-size: 16px; font-weight: 500; color: var(--ink); }
+  .card-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.55; margin-bottom: 14px; }
+  .card-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: auto;
+  }
+  .tool-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+  .tool-pill {
+    background: var(--cream-dark);
+    border-radius: 100px;
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 6px 9px;
+    white-space: nowrap;
+  }
+  .preview-btn {
+    font-size: 12px; font-weight: 500; color: var(--accent);
+    background: var(--accent-pale); border: none;
+    padding: 6px 14px; border-radius: 100px;
+    cursor: pointer; transition: background 0.18s;
+    flex: 0 0 auto;
+  }
+  .preview-btn:hover { background: #EBD0C4; }
+  .no-results {
+    color: var(--ink-muted);
+    font-size: 14px;
+    margin: -72px auto 92px;
+    max-width: 1280px;
+    padding: 0 5vw;
+  }
+  .hidden { display: none !important; }
+
+  footer {
+    background: var(--ink); color: var(--white);
+    padding: 22px 5vw;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 16px 20px;
+  }
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .footer-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+  }
+  .footer-logo span { color: var(--accent); }
+  footer p { font-size: 13px; color: rgba(255,255,255,0.45); }
+  .footer-copy {
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    justify-self: center;
+    white-space: nowrap;
+  }
+  .footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .social-link {
+    width: 20px;
+    height: 20px;
+    color: rgba(255,255,255,0.58);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: color 0.18s, transform 0.18s;
+  }
+  .social-link:hover {
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .social-link svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+    display: block;
+  }
+
+  /* ── Hamburger Menu ── */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: background 0.18s;
+  }
+  .hamburger:hover { background: var(--cream-dark); }
+  .hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: transform 0.28s ease, opacity 0.2s;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0; right: 0;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 5vw 28px;
+    z-index: 99;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 12px 40px rgba(26,24,20,0.10);
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu a:hover { color: var(--accent); }
+  .mobile-menu .mobile-cta {
+    margin-top: 12px;
+    background: var(--ink);
+    color: var(--white) !important;
+    border-radius: 100px;
+    padding: 12px 24px !important;
+    text-align: center;
+    border-bottom: none !important;
+    transition: background 0.2s !important;
+  }
+  .mobile-menu .mobile-cta:hover { background: var(--accent) !important; color: var(--white) !important; }
+
+  /* ── Laptop / Large Tablet: 1024px – 1280px ── */
+  @media (max-width: 1280px) {
+    .hero { padding: 72px 5vw 60px; }
+    .hero h1 { font-size: clamp(34px, 4.5vw, 56px); }
+    .gallery { grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
+  }
+
+  /* ── Tablet: 768px – 1023px ── */
+  @media (max-width: 1023px) and (min-width: 769px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 60px 5vw 50px;
+      gap: 36px;
+      text-align: center;
+    }
+    .hero p { max-width: 560px; margin-left: auto; margin-right: auto; }
+    .hero-actions { justify-content: center; }
+    .hero-visual {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero-mini-card:nth-child(2) { margin-top: 0; }
+    .hero-mini-card:nth-child(3) { margin-top: 0; }
+    .gallery {
+      grid-template-columns: repeat(2, 1fr);
+      padding: 20px 5vw 80px;
+    }
+    .gallery-tools-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .filter-search { max-width: 100%; width: 100%; }
+    .filter-tabs { justify-content: flex-start; }
+    footer {
+      grid-template-columns: 1fr;
+      gap: 10px 14px;
+      padding: 20px 5vw;
+    }
+    .footer-copy { justify-self: start; }
+    .nav-links { gap: 14px; }
+    .nav-links a { font-size: 12px; }
+  }
+
+  /* ── Mobile: ≤ 768px ── */
+  @media (max-width: 768px) {
+    /* Nav */
+    nav { padding: 0 4vw; }
+    .nav-links { display: none; }
+    .nav-cta { display: none; }
+    .hamburger { display: flex; }
+
+    /* Hero */
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 44px 4vw 40px;
+      gap: 32px;
+      text-align: center;
+    }
+    .hero h1 { font-size: clamp(30px, 8vw, 42px); margin-bottom: 14px; }
+    .hero p {
+      font-size: 15px;
+      margin-bottom: 28px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-actions { justify-content: center; flex-wrap: wrap; gap: 10px; }
+    .btn-primary { padding: 12px 24px; font-size: 14px; }
+    .hero-visual { display: none; }
+
+    /* Gallery tools */
+    .gallery-tools { padding: 8px 4vw 0; }
+    .gallery-tools-inner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding-top: 14px;
+    }
+    .filter-search {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      flex: none;
+    }
+    .filter-search input {
+      display: block;
+      width: 100%;
+      height: 44px;
+      font-size: 14px;
+      padding: 0 16px 0 42px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+    }
+    .filter-tabs {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .filter-btn { font-size: 12px; padding: 8px 13px; }
+
+    /* Gallery cards */
+    .gallery {
+      grid-template-columns: 1fr;
+      padding: 16px 4vw 72px;
+      gap: 16px;
+    }
+    .gallery.single-dashboard {
+      grid-template-columns: 1fr;
+    }
+    .card { border-radius: 14px; }
+    .card-thumb { aspect-ratio: 16 / 9; }
+    .card-body { padding: 14px 16px 16px; }
+    .card-title { font-size: 15px; }
+    .card-desc { font-size: 12.5px; margin-bottom: 12px; }
+    .card-footer {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .preview-btn { align-self: flex-end; font-size: 12px; padding: 7px 14px; }
+
+    /* Footer */
+    footer {
+      grid-template-columns: 1fr;
+      gap: 8px 14px;
+      padding: 20px 4vw;
+      text-align: left;
+    }
+    .footer-copy { justify-self: start; margin-top: 4px; }
+    .footer-logo { font-size: 18px; }
+    footer p { font-size: 12px; }
+  }
+
+  /* ── Small Mobile: ≤ 380px ── */
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 28px; }
+    .nav-logo { font-size: 19px; }
+    .gallery { padding: 12px 3vw 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Dash<span>efy</span></div>
+  <div class="nav-actions">
+    <div class="nav-links">
+      <a href="#">About</a>
+      <a href="https://www.linkedin.com/in/piyush-agarwal-1a93003a1" target="_blank" rel="noopener noreferrer" aria-label="Open LinkedIn profile">LinkedIn</a>
+      <a href="https://github.com/Piyush0415" target="_blank" rel="noopener noreferrer" aria-label="Open GitHub profile">GitHub</a>
+    </div>
+    <a href="#gallery" class="nav-cta">Browse All</a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a href="#">About</a>
+  <a href="https://www.linkedin.com/in/piyush-agarwal-1a93003a1" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+  <a href="https://github.com/Piyush0415" target="_blank" rel="noopener noreferrer">GitHub</a>
+  <a href="#gallery" class="mobile-cta" id="mobile-browse">Browse All</a>
+</div>
+
+<section class="hero">
+  <div>
+    <h1>Beautiful dashboards, <em>ready to use</em></h1>
+    <p>A curated collection of clean, purposeful dashboard layouts for every use case &mdash; analytics, finance, sales, and more.</p>
+    <div class="hero-actions">
+      <a href="#gallery" class="btn-primary">Explore Gallery</a>
+      <a href="#" class="btn-ghost">Learn more</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-mini-card">
+      <div class="mini-label">Total Revenue</div>
+      <div class="mini-num">$84K</div>
+      <div class="mini-bar-row">
+        <div style="height:55%;background:#C8502A;opacity:.5"></div>
+        <div style="height:70%;background:#C8502A;opacity:.6"></div>
+        <div style="height:45%;background:#C8502A;opacity:.5"></div>
+        <div style="height:90%;background:#C8502A"></div>
+        <div style="height:65%;background:#C8502A;opacity:.7"></div>
+        <div style="height:80%;background:#C8502A;opacity:.8"></div>
+      </div>
+    </div>
+    <div class="hero-mini-card">
+      <div class="mini-label">Active Users</div>
+      <div class="mini-num">12,409</div>
+      <svg viewBox="0 0 100 36" style="margin-top:10px;display:block;">
+        <polyline fill="none" stroke="#C8502A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,28 16,20 32,24 48,14 64,18 80,8 100,4"/>
+      </svg>
+    </div>
+    <div class="hero-mini-card">
+      <div class="mini-label">Conversion</div>
+      <div class="mini-num">3.8%</div>
+      <svg viewBox="0 0 80 80" width="60" style="margin-top:6px">
+        <circle cx="40" cy="40" r="30" fill="none" stroke="#EDE6D6" stroke-width="10"/>
+        <circle cx="40" cy="40" r="30" fill="none" stroke="#C8502A" stroke-width="10" stroke-dasharray="72 116" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+      </svg>
+    </div>
+    <div class="hero-mini-card">
+      <div class="mini-label">Orders today</div>
+      <div class="mini-num">248</div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px;">
+        <div style="height:6px;background:#EDE6D6;border-radius:3px;"><div style="width:72%;height:100%;background:#C8502A;border-radius:3px;"></div></div>
+        <div style="height:6px;background:#EDE6D6;border-radius:3px;"><div style="width:45%;height:100%;background:#C8502A;opacity:.6;border-radius:3px;"></div></div>
+        <div style="height:6px;background:#EDE6D6;border-radius:3px;"><div style="width:88%;height:100%;background:#C8502A;opacity:.4;border-radius:3px;"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery-tools" id="gallery" aria-label="Dashboard filters">
+  <div class="gallery-tools-inner">
+    <div class="gallery-kicker" id="result-count">0 dashboards</div>
+    <div class="filter-search">
+      <span class="search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="m16.5 16.5 4 4" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>
+        </svg>
+      </span>
+      <input id="dashboard-search" type="search" placeholder="Search dashboard name" aria-label="Search dashboards by name">
+    </div>
+    <div class="filter-tabs" id="filter-tabs" role="group" aria-label="Filter dashboards by category"></div>
+  </div>
+</section>
+
+<main class="gallery" id="gallery-grid" aria-live="polite"></main>
+<p class="no-results hidden" id="no-results">No dashboards found.</p>
+
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo">Dash<span>efy</span></div>
+    <div class="footer-socials" aria-label="Social profile links">
+      <a href="https://github.com/Piyush0415" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 .5A11.5 11.5 0 0 0 8.36 22.9c.58.1.79-.25.79-.56v-2.02c-3.22.7-3.9-1.38-3.9-1.38-.53-1.35-1.3-1.71-1.3-1.71-1.07-.73.08-.72.08-.72 1.18.08 1.8 1.21 1.8 1.21 1.05 1.8 2.75 1.28 3.42.98.1-.76.41-1.28.75-1.57-2.57-.29-5.28-1.29-5.28-5.73 0-1.27.45-2.3 1.2-3.11-.12-.29-.52-1.47.11-3.07 0 0 .98-.31 3.2 1.19a11.07 11.07 0 0 1 5.82 0c2.22-1.5 3.2-1.19 3.2-1.19.63 1.6.23 2.78.11 3.07.75.81 1.2 1.84 1.2 3.11 0 4.46-2.71 5.43-5.3 5.72.42.36.8 1.08.8 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/>
+        </svg>
+      </a>
+      <a href="https://www.linkedin.com/in/piyush-agarwal-1a93003a1" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Visit LinkedIn profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.34 8h4.28v14H.34V8Zm7.52 0h4.1v1.91h.06c.57-1.08 1.97-2.22 4.06-2.22 4.34 0 5.14 2.86 5.14 6.58V22h-4.28v-6.85c0-1.63-.03-3.73-2.27-3.73-2.28 0-2.63 1.78-2.63 3.61V22H7.86V8Z"/>
+        </svg>
+      </a>
+      <a href="#" class="social-link" aria-label="Visit X profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18.9 2h3.68l-8.04 9.19L24 22h-7.42l-5.8-7.59L4.14 22H.46l8.6-9.83L0 2h7.6l5.25 6.94L18.9 2Zm-1.29 18.1h2.04L6.5 3.8H4.31L17.61 20.1Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+  <p class="footer-copy">&copy; 2026 Dashify by Piyush Agarwal. All rights reserved.</p>
+</footer>
+
+<script>
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+
+  const labelFromCategory = category => category
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+  const makeDashboardImage = ({ title, metric, bg, accent, soft, chart = 'bars', dark = false }) => {
+    const ink = dark ? '#F7F0E2' : '#1A1814';
+    const muted = dark ? '#8C93A1' : '#8A8580';
+    const panel = dark ? '#1F2430' : '#FFFFFF';
+    const panelTwo = dark ? '#2A3040' : '#F9F5EE';
+    const grid = dark ? '#353B4B' : '#E6DED1';
+    const safeTitle = escapeHtml(title);
+    const safeMetric = escapeHtml(metric);
+    let chartMarkup = '';
+
+    if (chart === 'line') {
+      chartMarkup = `
+        <path d="M34 138 L72 122 L110 130 L148 92 L186 100 L224 72 L266 58" fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M34 154 L72 150 L110 145 L148 136 L186 128 L224 116 L266 108" fill="none" stroke="${soft}" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 8"/>
+        <circle cx="148" cy="92" r="7" fill="${accent}"/>
+        <circle cx="224" cy="72" r="7" fill="${accent}"/>`;
+    } else if (chart === 'donut') {
+      chartMarkup = `
+        <circle cx="150" cy="110" r="56" fill="none" stroke="${soft}" stroke-width="22"/>
+        <circle cx="150" cy="110" r="56" fill="none" stroke="${accent}" stroke-width="22" stroke-dasharray="230 352" stroke-linecap="round" transform="rotate(-90 150 110)"/>
+        <circle cx="150" cy="110" r="30" fill="${panel}"/>
+        <text x="150" y="106" text-anchor="middle" fill="${accent}" font-size="22" font-weight="700" font-family="DM Sans, Arial">${safeMetric}</text>
+        <text x="150" y="124" text-anchor="middle" fill="${muted}" font-size="11" font-family="DM Sans, Arial">overview</text>`;
+    } else if (chart === 'cards') {
+      chartMarkup = `
+        <rect x="30" y="68" width="108" height="56" rx="12" fill="${soft}"/>
+        <rect x="162" y="68" width="108" height="56" rx="12" fill="${accent}" opacity=".82"/>
+        <rect x="30" y="144" width="240" height="12" rx="6" fill="${soft}"/>
+        <rect x="30" y="144" width="168" height="12" rx="6" fill="${accent}"/>
+        <text x="84" y="98" text-anchor="middle" fill="${ink}" font-size="20" font-weight="700" font-family="DM Sans, Arial">${safeMetric}</text>
+        <text x="216" y="98" text-anchor="middle" fill="${panel}" font-size="20" font-weight="700" font-family="DM Sans, Arial">Live</text>`;
+    } else if (chart === 'ops') {
+      chartMarkup = `
+        <rect x="30" y="66" width="240" height="18" rx="5" fill="${panelTwo}"/>
+        <rect x="30" y="94" width="240" height="18" rx="5" fill="${panelTwo}"/>
+        <rect x="30" y="122" width="240" height="18" rx="5" fill="${panelTwo}"/>
+        <text x="42" y="79" fill="${accent}" font-size="10" font-family="Consolas, monospace">API healthy 99.98%</text>
+        <text x="42" y="107" fill="${accent}" font-size="10" font-family="Consolas, monospace">DB latency 14ms</text>
+        <text x="42" y="135" fill="#FACC15" font-size="10" font-family="Consolas, monospace">CDN degraded 82ms</text>
+        <path d="M34 164 L70 156 L106 158 L142 146 L178 151 L214 136 L266 128" fill="none" stroke="${accent}" stroke-width="3" stroke-linecap="round"/>`;
+    } else {
+      chartMarkup = `
+        <rect x="34" y="116" width="22" height="42" rx="4" fill="${accent}" opacity=".35"/>
+        <rect x="66" y="90" width="22" height="68" rx="4" fill="${accent}" opacity=".55"/>
+        <rect x="98" y="72" width="22" height="86" rx="4" fill="${accent}" opacity=".75"/>
+        <rect x="130" y="104" width="22" height="54" rx="4" fill="${accent}" opacity=".55"/>
+        <rect x="162" y="58" width="22" height="100" rx="4" fill="${accent}"/>
+        <rect x="194" y="84" width="22" height="74" rx="4" fill="${accent}" opacity=".75"/>
+        <rect x="226" y="68" width="22" height="90" rx="4" fill="${accent}"/>
+        <rect x="258" y="98" width="22" height="60" rx="4" fill="${accent}" opacity=".45"/>`;
+    }
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 190">
+        <rect width="300" height="190" fill="${bg}"/>
+        <rect x="18" y="18" width="264" height="154" rx="18" fill="${panel}" opacity=".96"/>
+        <path d="M34 52 H266" stroke="${grid}" stroke-width="1"/>
+        <text x="34" y="38" fill="${ink}" font-size="13" font-weight="700" font-family="DM Sans, Arial">${safeTitle}</text>
+        <text x="266" y="38" text-anchor="end" fill="${accent}" font-size="12" font-weight="700" font-family="DM Sans, Arial">${safeMetric}</text>
+        ${chartMarkup}
+      </svg>`;
+
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  };
+
+  // Edit this list to change the gallery. Add, remove, or update objects here.
+  // Use any image URL/path in "image", or keep makeDashboardImage(...) for generated previews.
+  const dashboardData = [
+    {
+      title: 'Pizza Sales Analytics',
+      category: 'sales',
+      description: 'Analyzed Pizza Hut sales using KPIs like revenue, orders, AOV, sales trends, and peak hours to identify customer behavior and business performance insights.',
+      tools: ['Power BI', 'MySQL', 'DAX'],
+      image: 'https://raw.githubusercontent.com/Piyush0415/PizzaSalesAnalytics/main/pizza_sales_dashboard.png'
+    },
+    {
+      title: 'Avian Data Insights',
+      category: 'analytics',
+      description: 'Analyzed birds dataset to discover species patterns, migration trends, habitat distribution, and behavioral insights using python libraries and EDA.',
+      tools: ['Jupyter', 'Python', 'Power BI','SQL'],
+      image: 'https://raw.githubusercontent.com/Piyush0415/AvianDataInsights/main/Avian_Dashboard.png'
+    }
+  ];
+
+  const galleryGrid = document.getElementById('gallery-grid');
+  const filterTabs = document.getElementById('filter-tabs');
+  const resultCount = document.getElementById('result-count');
+  const dashboardSearch = document.getElementById('dashboard-search');
+  const noResults = document.getElementById('no-results');
+  let activeFilter = 'all';
+  let cards = [];
+
+  const renderFilters = () => {
+    const categories = [...new Set(dashboardData.map(dashboard => dashboard.category))];
+    const filters = ['all', ...categories];
+
+    filterTabs.innerHTML = '';
+    filters.forEach(filter => {
+      const button = document.createElement('button');
+      button.className = `filter-btn${filter === activeFilter ? ' active' : ''}`;
+      button.type = 'button';
+      button.dataset.filter = filter;
+      button.setAttribute('aria-pressed', String(filter === activeFilter));
+      button.textContent = filter === 'all' ? 'All' : labelFromCategory(filter);
+      filterTabs.appendChild(button);
+    });
+  };
+
+  const renderCards = () => {
+    galleryGrid.innerHTML = dashboardData.map(dashboard => `
+      <article class="card" data-cat="${escapeHtml(dashboard.category)}">
+        <div class="card-thumb">
+          <img src="${escapeHtml(dashboard.image)}" alt="${escapeHtml(dashboard.title)} dashboard preview" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="card-title">${escapeHtml(dashboard.title)}</div>
+          </div>
+          <div class="card-desc">${escapeHtml(dashboard.description)}</div>
+          <div class="card-footer">
+            <div class="tool-list" aria-label="Tools used">
+              ${dashboard.tools.map(tool => `<span class="tool-pill">${escapeHtml(tool)}</span>`).join('')}
+            </div>
+            <button class="preview-btn" type="button">Preview &rarr;</button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    galleryGrid.classList.toggle('single-dashboard', dashboardData.length === 1);
+    cards = [...document.querySelectorAll('.card')];
+  };
+
+  const updateGallery = () => {
+    const query = dashboardSearch.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const title = card.querySelector('.card-title').textContent.toLowerCase();
+      const matchesFilter = activeFilter === 'all' || card.dataset.cat === activeFilter;
+      const matchesSearch = query === '' || title.includes(query);
+      const shouldShow = matchesFilter && matchesSearch;
+
+      card.classList.toggle('hidden', !shouldShow);
+      if (shouldShow) visibleCount += 1;
+    });
+
+    resultCount.textContent = `${visibleCount} dashboard${visibleCount === 1 ? '' : 's'}`;
+    noResults.classList.toggle('hidden', visibleCount !== 0);
+  };
+
+  filterTabs.addEventListener('click', event => {
+    const button = event.target.closest('.filter-btn');
+    if (!button) return;
+
+    activeFilter = button.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      const isActive = btn === button;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+    });
+
+    updateGallery();
+  });
+
+  dashboardSearch.addEventListener('input', updateGallery);
+
+  galleryGrid.addEventListener('click', event => {
+    const button = event.target.closest('.preview-btn');
+    if (!button) return;
+
+    event.stopPropagation();
+    const title = button.closest('.card').querySelector('.card-title').textContent;
+    alert(`Preview for "${title}" \u2014 coming soon!`);
+  });
+
+  renderFilters();
+  renderCards();
+  updateGallery();
+
+  // Hamburger menu toggle
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const mobileBrowse = document.getElementById('mobile-browse');
+
+  hamburger.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+  });
+
+  // Close menu when a link is clicked
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+    });
+  });
+
+  // Close menu on outside click
+  document.addEventListener('click', e => {
+    if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+    }
+  });
+</script>
+</body>
+</html>
