@@ -366,6 +366,7 @@
     stroke-linejoin: round;
     stroke-width: 2;
   }
+  .footer-contact-item span { overflow-wrap: anywhere; }
   .social-link {
     width: 20px;
     height: 20px;
@@ -587,14 +588,22 @@
 
     /* Footer */
     footer {
-      grid-template-columns: 1fr;
-      gap: 8px 14px;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px 16px;
       padding: 20px 4vw;
       text-align: left;
+      align-items: start;
     }
-    .footer-copy { justify-self: start; margin-top: 4px; }
+    .footer-copy {
+      grid-column: 1 / -1;
+      justify-self: start;
+      margin-top: 4px;
+    }
     .footer-logo { font-size: 18px; }
-    .footer-contact { justify-self: start; }
+    .footer-contact {
+      justify-self: end;
+      max-width: 100%;
+    }
     .footer-contact-item { font-size: 12px; }
     footer p { font-size: 12px; }
   }
