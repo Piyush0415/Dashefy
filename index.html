@@ -665,7 +665,7 @@
         <div style="height:55%;background:#C8502A;opacity:.5"></div>
         <div style="height:70%;background:#C8502A;opacity:.6"></div>
         <div style="height:45%;background:#C8502A;opacity:.5"></div>
-        <div style="height:90%;background:#C8502A"></div>
+        <div style="height:90%;background:#C8502A orient"></div>
         <div style="height:65%;background:#C8502A;opacity:.7"></div>
         <div style="height:80%;background:#C8502A;opacity:.8"></div>
       </div>
@@ -770,7 +770,6 @@
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  // Updated dashboardData layout with fixed direct raw image links and dynamic repo properties
   const dashboardData = [
     {
       title: 'Pizza Analytics Studio',
@@ -794,7 +793,7 @@
       description: 'Third Umpire Insights is an end-to-end cricket analytics dashboard built using Power BI, featuring a complete API-driven ETL pipeline that automatically extracts, transforms, and loads cricket match data into an interactive reporting environment.',
       tools: ['API', 'Python', 'Jupyter','ETL'],
       image: 'https://raw.githubusercontent.com/Piyush0415/ThirdUmpireInsights/main/insights_dashboard.png',
-      repo: 'https://github.com/Piyush0415/ThirdUmpireInsights.git'
+      repo: 'https://github.com/Piyush0415/ThirdUmpireInsights'
     }
   ];
 
@@ -822,7 +821,6 @@
     });
   };
 
-  // Reconfigured preview button to use an anchor element navigating directly to your GitHub repo link
   const renderCards = () => {
     galleryGrid.innerHTML = dashboardData.map(dashboard => `
       <article class="card" data-cat="${escapeHtml(dashboard.category)}">
@@ -838,7 +836,7 @@
             <div class="tool-list" aria-label="Tools used">
               ${dashboard.tools.map(tool => `<span class="tool-pill">${escapeHtml(tool)}</span>`).join('')}
             </div>
-            <a class="preview-btn" href="${escapeHtml(dashboard.repo)}" target="_blank" rel="noopener noreferrer">Repo &rarr;</a>
+            <a class="preview-btn" href="${escapeHtml(dashboard.repo)}" target="_blank" rel="noopener noreferrer">Repository &rarr;</a>
           </div>
         </div>
       </article>
