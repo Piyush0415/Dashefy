@@ -1096,7 +1096,7 @@
       category: 'AI/ML',
       description: 'Nexora AI helps businesses predict customer churn using the power of AI. Identify customers who may leave, uncover valuable insights, and take smarter actions to improve customer retention. Turn data into decisions and keep your customers coming back.',
       tools: ['FastAPI', 'Python', 'SckitLearn','Docker','GitHub'],
-      image: 'https://github.com/Piyush0415/Nexora-AI/blob/main/nexora_ai_page.jpeg'
+      image: 'https://raw.githubusercontent.com/Piyush0415/Nexora-AI/main/nexora_ai_page.jpeg'
     }
   ];
 
@@ -1168,11 +1168,40 @@
     });
   };
 
+  // Normalize image URLs so GitHub "blob" links serve the actual image file.
+  // Direct image URLs are preserved, regardless of their image extension/format.
+  const getImageUrl = imageUrl => {
+    if (!imageUrl) return '';
+
+    try {
+      const url = new URL(imageUrl, window.location.href);
+
+      // Convert https://github.com/user/repo/blob/branch/path
+      // into https://raw.githubusercontent.com/user/repo/branch/path
+      if (url.hostname === 'github.com') {
+        const parts = url.pathname.split('/').filter(Boolean);
+        const blobIndex = parts.indexOf('blob');
+
+        if (parts.length >= 5 && blobIndex === 2) {
+          const user = parts[0];
+          const repo = parts[1];
+          const branch = parts[3];
+          const filePath = parts.slice(4).join('/');
+          return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filePath}`;
+        }
+      }
+
+      return url.href;
+    } catch {
+      return imageUrl;
+    }
+  };
+
   const renderCards = () => {
     galleryGrid.innerHTML = dashboardData.map(dashboard => `
       <article class="card" data-cat="${escapeHtml(dashboard.category)}">
         <div class="card-thumb">
-          <img src="${escapeHtml(dashboard.image)}" alt="${escapeHtml(dashboard.title)} dashboard preview" loading="lazy">
+          <img src="${escapeHtml(getImageUrl(dashboard.image))}" alt="${escapeHtml(dashboard.title)} dashboard preview" loading="lazy" decoding="async">
         </div>
         <div class="card-body">
           <div class="card-top">
